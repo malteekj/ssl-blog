@@ -1,0 +1,60 @@
+---
+layout: post
+title:  "Variational Autoencoders"
+date:   2022-02-01 21:52:57 +0100
+categories: jekyll update
+---
+
+
+## Variational Autoencoders
+
+### Introduction
+Variational Autoencoders (VAEs) are a class of generative neural networks that can encode data in a self-supervised fashion. It consist of an encoder, a latent space (also called the bottleneck) and a decoder, where each latent variable in the latent space is assumed to have a probability distribution. They differ from a traditional autoencoder (AE) in that the latent space consist of stochastic variables, which need to be sampled. The sampling is carried out by using the reparameterization trick and variational inference, as evaluating the integral is intractable.
+
+### Intuition
+The VAE bears resemblance to the AE, but differ in some main aspects. The main goal of both models is to take an input and compress it into a latent space using the encoder and then reconstruct the input again from the latent space through the decoder. This forces the encoder to extract prominent features of the input data, in order for the decoder to have sufficient information to reconstruct the input data.
+
+In the VAE, the latent space have a probability distribution, often set to a standard normal distribution where each latent variable is independent of the others. Hence, the encoder is outputting a _distribution_, and not directly a latent variable as in the AE. The job of the encoder is more precisely to output a distribution of the latent variables, from which we can sample, that is _likely_ to produce good reconstructions from the decoder.
+
+Since we have assumed a distribution for the latent space in the VAE, we can sample new examples by passing noise through the decoder, sampled with the same distribution as the latent space. This is what makes the VAE suitable to use as a generative model, once trained. However, in practice a vanilla VAE produce blurry samples of e.g. images, and other more sophisticated versions are necessary to produce good reconstructions.
+
+As the job of the encoder is to effectively compress our input data, it can be utilized in semi-supervised learning. After training, the encoder can be fine tuned on a smaller, labelled dataset, or the VAE can be trained jointly on both labelled and unlabelled data at the same time (see Variations).
+
+Another application of the VAE is unsupervised clustering of data. While the model trains, the encoder and decoder tries to extract natural structure in the data and organize similar data points in vicinity of each other in the latent space. The latent space can then be visualized using projection methods such as PCA, t-SNE and UMAP, and clusters can be examined from here.
+
+### Model and Math
+
+### Variations
+
+* [beta-VAE: Learning Basic Visual Concepts with a Constrained Variational Framework (2017)](https://openreview.net/forum?id=Sy2fzU9gl)  
+The authors propose to weight the KL term with hyperparameter $$\beta$$. They show that using $$\beta > 1$$ forces the VAE to learn more disentangled representations.
+
+* [Auxiliary Deep Generative Models (2016)](https://arxiv.org/abs/1602.05473)  
+This model adds an extra auxiliary latent to the VAE. As a latent space with a non-diagonal covariance matrix would be heavy to train, the latent is implicitly correlated through the auxiliary latent space, hence making the model more expressive at a lower computational cost.
+
+* [Ladder Variational Autoencoders (2016)](https://arxiv.org/abs/1602.02282)  
+This model connects latent layers in a similar fashion to the Ladder Network [Rasmus et al. 2015](https://arxiv.org/abs/1507.02672) and [Valpola 2015](https://arxiv.org/abs/1411.7783). The outputs from the encoder and the sampling for the decoder is shared, which creates a more expressive model with hierarchical latent variables.
+
+
+### Seminal Papers
+* [Tutorial on Variational Autoencoders (2016)](https://arxiv.org/abs/1606.05908)  
+A gentle introduction to the theory and intuition of VAEs, with a different proof than using Jensen's inequality for the ELBO loss
+* [Semi-Supervised Learning with Deep Generative Models (2014)](https://arxiv.org/abs/1406.5298)  
+Introduction of the VAE as a semi-supervised model
+* [Auto-Encoding Variational Bayes (2013)](Auto-Encoding Variational Bayes)  
+Original paper on VAEs from Kingma and Welling
+
+
+### Code Repositories
+ * **Semi-supervised learning with VAEs** [Github](https://github.com/wohlert/semi-supervised-pytorch)  
+ Implementation of several models (VAE, Auxiliary VAE, importance weighted, Ladder VAE, normalizing flows, $$\beta$$-VAE), as well as different sampling strategies.
+
+### Tricks of the Trade
+* **Number of Monte Carlo samples from the latent space**: The most common practice is to have single sample from the latent space
+* **Size of the latent space**: This needs to be explored empirically. However:
+    * [Kingma et al. (2014)](https://arxiv.org/abs/1406.5298) uses 50 for MNIST 
+* **KL Warmup**: It is often beneficial to slowly ramp up the KL term (warmup), so it will not dominate the loss
+* **Multiple stochastic layers**: [Maaløe et al. (2016)](https://arxiv.org/abs/1602.05473) states that simply cascading two stochastic layers will not converge
+
+
+
