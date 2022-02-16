@@ -23,6 +23,50 @@ As the job of the encoder is to effectively compress our input data, it can be u
 Another application of the VAE is unsupervised clustering of data. While the model trains, the encoder and decoder tries to extract natural structure in the data and organize similar data points in vicinity of each other in the latent space. The latent space can then be visualized using projection methods such as PCA, t-SNE and UMAP, and clusters can be examined from here.
 
 ### Model and Math
+Two derivations of the Evidence Lower Bound (ELBO) exists, one from the ground up by Carl Doersch and one using Jensen's inequality. We first take the deriviation of Doersch, as it offers the most intuition.
+
+Overall we wish learn the distribution over our data $$P(X)$$, defined on some (high dimensional) space $$\chi$$, where $$X$$ could e.g. be images. We wish to represent the structure of our by a vector of latent variables $$z$$. This could be the components of handwritten digits, such that a set of latent variables could describe e.g. the digit 5 and the different ways to write a 5. Further, we wish to be able to easily sample the latent variables $$z$$ according to distribution $$P(z)$$ to produce new examples that are very similar to our original data X.
+
+Formally, we have say that we have a vector of latent variables $$z$$ in a high-dimensional space $$\mathcal{Z}$$ which we can sample according to $$P(z)$$. We then have a family of deterministic functions $$f(z;\theta)$$, parameterized by a vector $$\theta$$ in some space $$\Theta$$ where $$f\,:\, \mathcal{Z} \times \Theta \rightarrow \chi$$. Here, $$f$$ will be deterministic, $$z$$ is random and $$\theta$$is fixed. We then have that $$f(z;\theta)$$ is a random variable in the space $$\chi$$. In our case, $$f$$ is a neural network (the **decoder**) and $$\theta$$ are the weights of the network that we wish to train. $$f(z;\theta)$$ (decoder) maps specific samples of $$z$$ into examples of e.g. images similar to our data distribution $$P(X)$$.
+
+We wish to maximize the probability of each $$X$$ in the training set under the generative process, according to 
+
+$$\begin{equation}
+P(X) = \int P(X|z;\theta)P(z)\, dz
+\end{equation}$$
+
+$$f(z;\theta)$$ has been replaced by a distribution $$P(X|z;\theta)$$, which make the dependence of $$z$$ on $$X$$ explicit. The choice of this output distribution is often chosen to be Gaussian: $$P(X|z;\theta) = \mathcal{N}(X|f(z;\theta), \sigma^2 \cdot I)$$. That is, it has mean $$f(z;\theta)$$ and a diagonal covariance matrix times some scalar $$\sigma^2$$. The prior $$P(z)$$ is often chosen to be a standard Gaussian: 
+$$P(z) = \mathcal{N}(0, I)$$. In practice, this mean that we evaluate the generated $$X$$ on a normal distribution on how well it fit out data distribution $$P(X)$$.
+
+Since it would quite ineffective to simply sample $$z$$ until we got good representations of P(x), we wish to have a function 
+$$Q(z|X)$$ which can take a value of X and give us a distribution over over $$z$$ values that a likely to produce X. This is what will be our **encoder**. Given that $$Q(z|X)$$ does a good job of suggesting distributions over $$z$$ that are likely to produce X, the space will be much smaller and we can easier compute e.g. $$E_{z \sim Q} P(X\vert z)$$.  
+
+In order for this to work, we need to relate $$E_{z \sim Q} P(X \vert z)$$ and $$P(x)$$. This next part will seem slightly convoluted a first, but will make sense in the end. Since $$Q(z)$$ is the distribution over $$z$$ that would yield good distributions to sample from, we stat with the Kullback-Liebler divergence (KL divergence or $$\mathcal{D}$$) between $$p(z \vert X)$$ and $$Q(z)
+
+$$\begin{equation}
+\mathcal{D}[Q(z) \| P(z \vert X)]=E_{z \sim Q}[\log Q(z)-\log P(z \vert X)]
+\end{equation}$$
+
+We get $$P(X)$$ and $$P(X \vert z)$$ into the equation by applying Bayes rule to $$P(z \vert X)$$
+
+$$\begin{equation}
+\mathcal{D}[Q(z) \| P(z \vert X)]=E_{z \sim Q}[\log Q(z)-\log P(X \vert z)-\log P(z)]+\log P(X)
+\end{equation}$$
+
+$$\log P(X)$$ comes out of the expectation as it does not depend on z. By negating both sides, rearranging and contracting part of $$E_{z\sim Q}$$ in the KL divergence, we get 
+
+$$\begin{equation}
+\log P(X)-\mathcal{D}[Q(z) \| P(z \vert X)]=E_{z \sim Q}[\log P(X \vert z)]-\mathcal{D}[Q(z) \| P(z)]
+\end{equation}$$
+
+Since we are interested in inferring $$P(X)$$ it would make sense to construct $$Q$$ so that it depends on $$X$$, and one that would make $$\mathcal{D}[Q(z) \| P(z \vert X)]$$ small 
+
+$$\begin{equation}
+\log P(X)-\mathcal{D}[Q(z \mid X) \| P(z \mid X)]=E_{z \sim Q}[\log P(X \mid z)]-\mathcal{D}[Q(z \mid X) \| P(z)]
+\end{equation}$$
+
+
+
 
 ### Variations
 
