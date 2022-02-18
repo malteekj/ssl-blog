@@ -8,10 +8,11 @@ categories: jekyll update
 
 ## Variational Autoencoders
 
-### Introduction
-Variational Autoencoders (VAEs) are a class of generative neural networks that can encode data in a self-supervised fashion. It consist of an encoder, a latent space (also called the bottleneck) and a decoder, where each latent variable in the latent space is assumed to have a probability distribution. They differ from a traditional autoencoder (AE) in that the latent space consist of stochastic variables, which need to be sampled. The sampling is carried out by using the reparameterization trick and variational inference, as evaluating the integral is intractable.
+### **Introduction**
+Variational Autoencoders (VAEs) are a class of generative neural networks that can encode data in a self-supervised fashion. It consist of an encoder, a latent space (also called the bottleneck) and a decoder, where each latent variable in the latent space is assumed to have a probability distribution. They differ from a traditional autoencoder (AE) in that the latent space consist of stochastic variables, which need to be sampled. The sampling is carried out by using the reparameterization trick and variational inference, as evaluating the integral is intractable.  
+&nbsp;
 
-### Intuition
+### **Intuition**
 The VAE bears resemblance to the AE, but differ in some main aspects. The main goal of both models is to take an input and compress it into a latent space using the encoder and then reconstruct the input again from the latent space through the decoder. This forces the encoder to extract prominent features of the input data, in order for the decoder to have sufficient information to reconstruct the input data.
 
 In the VAE, the latent space have a probability distribution, often set to a standard normal distribution where each latent variable is independent of the others. Hence, the encoder is outputting a _distribution_, and not directly a latent variable as in the AE. The job of the encoder is more precisely to output a distribution of the latent variables, from which we can sample, that is _likely_ to produce good reconstructions from the decoder.
@@ -20,16 +21,18 @@ Since we have assumed a distribution for the latent space in the VAE, we can sam
 
 As the job of the encoder is to effectively compress our input data, it can be utilized in semi-supervised learning. After training, the encoder can be fine tuned on a smaller, labelled dataset, or the VAE can be trained jointly on both labelled and unlabelled data at the same time (see Variations).
 
-Another application of the VAE is unsupervised clustering of data. While the model trains, the encoder and decoder tries to extract natural structure in the data and organize similar data points in vicinity of each other in the latent space. The latent space can then be visualized using projection methods such as PCA, t-SNE and UMAP, and clusters can be examined from here.
+Another application of the VAE is unsupervised clustering of data. While the model trains, the encoder and decoder tries to extract natural structure in the data and organize similar data points in vicinity of each other in the latent space. The latent space can then be visualized using projection methods such as PCA, t-SNE and UMAP, and clusters can be examined from here.  
+&nbsp; 
 
-### Model and Math
+### **Model and Math**
 Two derivations of the Evidence Lower Bound (ELBO) exists, one from the ground up by Carl Doersch and one using Jensen's inequality. We first take the deriviation of Doersch, as it offers the most intuition.
 
+**Derivation from Doersch**  
 Overall we wish learn the distribution over our data $$P(X)$$, defined on some (high dimensional) space $$\chi$$, where $$X$$ could e.g. be images. We wish to represent the structure of our by a vector of latent variables $$z$$. This could be the components of handwritten digits, such that a set of latent variables could describe e.g. the digit 5 and the different ways to write a 5. Further, we wish to be able to easily sample the latent variables $$z$$ according to distribution $$P(z)$$ to produce new examples that are very similar to our original data X.
 
 Formally, we have say that we have a vector of latent variables $$z$$ in a high-dimensional space $$\mathcal{Z}$$ which we can sample according to $$P(z)$$. We then have a family of deterministic functions $$f(z;\theta)$$, parameterized by a vector $$\theta$$ in some space $$\Theta$$ where $$f\,:\, \mathcal{Z} \times \Theta \rightarrow \chi$$. Here, $$f$$ will be deterministic, $$z$$ is random and $$\theta$$is fixed. We then have that $$f(z;\theta)$$ is a random variable in the space $$\chi$$. In our case, $$f$$ is a neural network (the **decoder**) and $$\theta$$ are the weights of the network that we wish to train. $$f(z;\theta)$$ (decoder) maps specific samples of $$z$$ into examples of e.g. images similar to our data distribution $$P(X)$$.
 
-We wish to maximize the probability of each $$X$$ in the training set under the generative process, according to 
+We wish to maximize the probability of each $$X$$ in the training set under the generative process, according to
 
 $$\begin{equation}
 P(X) = \int P(X|z;\theta)P(z)\, dz
@@ -59,16 +62,45 @@ $$\begin{equation}
 \log P(X)-\mathcal{D}[Q(z) \| P(z \vert X)]=E_{z \sim Q}[\log P(X \vert z)]-\mathcal{D}[Q(z) \| P(z)]
 \end{equation}$$
 
-Since we are interested in inferring $$P(X)$$ it would make sense to construct $$Q$$ so that it depends on $$X$$, and one that would make $$\mathcal{D}[Q(z) \| P(z \vert X)]$$ small 
+Since we are interested in inferring $$P(X)$$ it would make sense to construct $$Q$$ so that it depends on $$X$$, and a $$Q$$ that would make $$\mathcal{D}[Q(z) \| P(z \vert X)]$$ small 
 
 $$\begin{equation}
-\log P(X)-\mathcal{D}[Q(z \mid X) \| P(z \mid X)]=E_{z \sim Q}[\log P(X \mid z)]-\mathcal{D}[Q(z \mid X) \| P(z)]
+\log P(X)-\mathcal{D}[Q(z \vert X) \| P(z \vert X)] = E_{z \sim Q}[\log P(X \vert z)]-\mathcal{D}[Q(z \vert X) \| P(z)]
 \end{equation}$$
 
+The left hand is what we want to optimize: $$P(X)$$ and an error term, which is how far our distribution $$Q$$ is from producing $$z$$'s that can reproduce $$X$$ (this distribution is $$\mathcal{D}[Q(z \vert X) \| P(z \vert X)])$$). $$\mathcal{D}[Q(z \mid X) \| P(z \mid X)]$$ is unknown and we cannot evaluate this, which is what makes the left hand side a lower bound. The left hand side is what we optimize via stochastic gradient descent, where $$E_{z \sim Q}[\log P(X \mid z)]$$ is our reconstruction loss and \mathcal{D}[Q(z \mid X) \| P(z)] is the KL divergence between our assumed distribution of $$P(z)$$ and the distribution of $$z$$ outputted by our encoder, $$Q(z \vert X)$$.
 
+However, we cannot backpropagate through stochastic layers. To solve this, the "reparameterization trick" is used. The encoder will output a mean vector $$\boldsymbol{\mu}$$ and a covariance matrix $$\boldsymbol{\Sigma}$$. We then sample $$\boldsymbol{\epsilon} \sim \mathcal{N}(0,I)$$ and use this as our $$\boldsymbol{z}$$: $$\boldsymbol{z} = \boldsymbol{\mu} + \boldsymbol{\Sigma}^{1/2} \cdot \boldsymbol{\epsilon}$$. Most often, the covariance matrix is assumed to be diagonal due to computational limits.
 
+In pseudo Python code, this will look like
 
-### Variations
+```python
+# log_var is used to not get negative variances
+mu, log_var = encoder(X)
+epsilon = randomn(0,1, len(mu)) # could also be len(log_var)
+# log_var is assumed to be diagonal here
+z = mu + exp(log_var)**(0.5)*epsilon
+
+# X_hat 
+X_hat = decoder(z)
+
+# Reconstruction loss evaluated on a gaussian:
+rec_loss = Gaussian(X, X_hat)
+
+# KL divergence between the distribution from z and a standard Gaussian 
+KL_loss = KL(mu, log_var)
+
+loss = rec_loss - KL_loss
+
+# backpropagate and step
+loss.backward()
+optimizer.step()
+
+# Repeat until convergence
+```  
+&nbsp;
+
+### **Variations**
 
 * [beta-VAE: Learning Basic Visual Concepts with a Constrained Variational Framework (2017)](https://openreview.net/forum?id=Sy2fzU9gl)  
 The authors propose to weight the KL term with hyperparameter $$\beta$$. They show that using $$\beta > 1$$ forces the VAE to learn more disentangled representations.
@@ -77,23 +109,24 @@ The authors propose to weight the KL term with hyperparameter $$\beta$$. They sh
 This model adds an extra auxiliary latent to the VAE. As a latent space with a non-diagonal covariance matrix would be heavy to train, the latent is implicitly correlated through the auxiliary latent space, hence making the model more expressive at a lower computational cost.
 
 * [Ladder Variational Autoencoders (2016)](https://arxiv.org/abs/1602.02282)  
-This model connects latent layers in a similar fashion to the Ladder Network [Rasmus et al. 2015](https://arxiv.org/abs/1507.02672) and [Valpola 2015](https://arxiv.org/abs/1411.7783). The outputs from the encoder and the sampling for the decoder is shared, which creates a more expressive model with hierarchical latent variables.
+This model connects latent layers in a similar fashion to the Ladder Network [Rasmus et al. 2015](https://arxiv.org/abs/1507.02672) and [Valpola 2015](https://arxiv.org/abs/1411.7783). The outputs from the encoder and the sampling for the decoder is shared, which creates a more expressive model with hierarchical latent variables.  
+&nbsp;
 
-
-### Seminal Papers
+### **Seminal Papers**
 * [Tutorial on Variational Autoencoders (2016)](https://arxiv.org/abs/1606.05908)  
 A gentle introduction to the theory and intuition of VAEs, with a different proof than using Jensen's inequality for the ELBO loss
 * [Semi-Supervised Learning with Deep Generative Models (2014)](https://arxiv.org/abs/1406.5298)  
 Introduction of the VAE as a semi-supervised model
 * [Auto-Encoding Variational Bayes (2013)](Auto-Encoding Variational Bayes)  
-Original paper on VAEs from Kingma and Welling
+Original paper on VAEs from Kingma and Welling  
+&nbsp;
 
-
-### Code Repositories
+### **Code Repositories**
  * **Semi-supervised learning with VAEs** [Github](https://github.com/wohlert/semi-supervised-pytorch)  
- Implementation of several models (VAE, Auxiliary VAE, importance weighted, Ladder VAE, normalizing flows, $$\beta$$-VAE), as well as different sampling strategies.
+ Implementation of several models (VAE, Auxiliary VAE, importance weighted, Ladder VAE, normalizing flows, $$\beta$$-VAE), as well as different sampling strategies.  
+&nbsp;
 
-### Tricks of the Trade
+### **Tricks of the Trade**
 * **Number of Monte Carlo samples from the latent space**: The most common practice is to have single sample from the latent space
 * **Size of the latent space**: This needs to be explored empirically. However:
     * [Kingma et al. (2014)](https://arxiv.org/abs/1406.5298) uses 50 for MNIST 
