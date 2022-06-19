@@ -4,15 +4,4 @@ title: About
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
-
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
-
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
-
-
-[jekyll-organization]: https://github.com/jekyll
+This log is intended to offer an overview of self-supervised deep learning. Many great blog posts exist on different aspects of self-supervised learning, but this log aims at collecting the information one place, in a wiki-style resource. Right now I am documenting my own learning journey through the field, but the hope is to have it as a crowd-sourced page, were experts in each branch of self-supervised learning can share their knowledge and let the community benefit from their experience, as well as showcasing their knowledge about their field.
