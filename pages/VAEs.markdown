@@ -6,7 +6,7 @@ permalink: /VAEs
 ---
 
 ### **Introduction**
-Variational Autoencoders (VAEs) are a class of generative neural networks that can encode data in a self-supervised fashion. It consist of an encoder, a latent space (also called the bottleneck) and a decoder, where each latent variable in the latent space is assumed to have a probability distribution. They differ from a traditional autoencoder (AE) in that the latent space consist of stochastic variables, which need to be sampled. The sampling is carried out by using the reparameterization trick and variational inference, as evaluating the integral is intractable.  
+Variational Autoencoders (VAEs) are a class of generative neural networks that can encode data in a self-supervised manner. It consist of an encoder, a latent space (also called the bottleneck) and a decoder, where each latent variable in the latent space is assumed to have a probability distribution. They differ from a traditional autoencoder (AE) in that the latent space consist of stochastic variables, which need to be sampled. The sampling is carried out by using the reparameterization trick and variational inference, as evaluating the integral is intractable.  
 
 **Content**
 * [Intuition](#intuition)  
