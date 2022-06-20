@@ -4,6 +4,7 @@
 
 layout: home 
 title: ""
+# permalink: /ssl-log/
 ---
 
 # Self-Supervised Log 
