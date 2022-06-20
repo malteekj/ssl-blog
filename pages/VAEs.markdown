@@ -2,7 +2,7 @@
 layout: page
 title:  "Variational Autoencoders"
 date:   2022-02-01 21:52:57 +0100
-permalink: /VAEs
+permalink: /VAEs/
 ---
 
 ### **Introduction**

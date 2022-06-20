@@ -14,7 +14,7 @@ This log is intended to offer an overview of self-supervised deep learning. Many
 # Topics
 
 ## Variational Autoencoders 
-* [VAEs](/ssl-blog/VAEs/)
+* [VAEs](/ssl-blog/VAEs)
 
 ## Contrastive Methods
 * __Contrastive Objectives__
