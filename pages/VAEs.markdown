@@ -6,7 +6,7 @@ permalink: /VAEs
 ---
 
 ### **Introduction**
-Variational Autoencoders (VAEs) are a class of generative neural networks that can encode data in a self-supervised manner. It consist of an encoder, a latent space (also called the bottleneck) and a decoder, where each latent variable in the latent space is assumed to have a probability distribution. They differ from a traditional autoencoder (AE) in that the latent space consist of stochastic variables, which need to be sampled. The sampling is carried out by using the reparameterization trick and variational inference, as evaluating the integral is intractable.  
+Variational Autoencoders (VAEs) are a class of generative neural networks that can encode data in a self-supervised manner. It consist of an encoder, a latent space (also called the bottleneck) and a decoder, where each latent variable in the latent space is assumed to have a probability distribution. They differ from a traditional autoencoder (AE) in that the latent space consists of stochastic variables, which need to be sampled. The sampling is carried out by using the reparameterization trick and variational inference, since evaluating the integral is intractable.  
 
 **Content**
 * [Intuition](#intuition)  
@@ -18,15 +18,15 @@ Variational Autoencoders (VAEs) are a class of generative neural networks that c
 &nbsp;
 
 ### **Intuition**<a name="#intuition"></a>
-The VAE bears resemblance to the AE, but differ in some main aspects. The main goal of both models is to take an input and compress it into a latent space using the encoder and then reconstruct the input again from the latent space through the decoder. This forces the encoder to extract prominent features of the input data, in order for the decoder to have sufficient information to reconstruct the input data.
+The VAE bears resemblance to the AE, but differ in some main aspects. The main goal of both models is to take an input and compress it into a latent space, using the encoder and then reconstruct the input again from the latent space through the decoder. This forces the encoder to extract prominent features of the input data, in order for the decoder to have sufficient information to reconstruct the input data.
 
 In the VAE, the latent space have a probability distribution, often set to a standard normal distribution where each latent variable is independent of the others. Hence, the encoder is outputting a _distribution_, and not directly a latent variable as in the AE. The job of the encoder is more precisely to output a distribution of the latent variables, from which we can sample, that is _likely_ to produce good reconstructions from the decoder.
 
-Since we have assumed a distribution for the latent space in the VAE, we can sample new examples by passing noise through the decoder, sampled with the same distribution as the latent space. This is what makes the VAE suitable to use as a generative model, once trained. However, in practice a vanilla VAE produce blurry samples of e.g. images, and other more sophisticated versions are necessary to produce good reconstructions.
+Since we have assumed a distribution for the latent space in the VAE, we can sample new examples by passing noise through the decoder, sampled with the same distribution as the latent space. This is what makes the VAE suitable to use as a generative model, once trained. However, in practice a vanilla VAE produce blurry samples of e.g. images, and other more sophisticated versions are necessary to generate good images.
 
-As the job of the encoder is to effectively compress our input data, it can be utilized in semi-supervised learning. After training, the encoder can be fine tuned on a smaller, labelled dataset, or the VAE can be trained jointly on both labelled and unlabelled data at the same time (see Variations).
+As the job of the encoder is to effectively compress our input data, it can be utilized in semi-supervised learning. After training, the encoder can be finetuned on a smaller, labelled dataset. Or the VAE can be trained jointly on both labelled and unlabelled data at the same time (see [Variations](#variations)).
 
-Another application of the VAE is unsupervised clustering of data. While the model trains, the encoder and decoder tries to extract natural structure in the data and organize similar data points in vicinity of each other in the latent space. The latent space can then be visualized using projection methods such as PCA, t-SNE and UMAP, and clusters can be examined from here.  
+Another application of the VAE, is unsupervised clustering of data. While the model trains, the encoder and decoder tries to extract natural structure in the data, and organize similar data points in the vicinity of each other in the latent space. The latent space can then be visualized using projection methods such as PCA, t-SNE and UMAP, and clusters can be examined from here.  
 &nbsp; 
 
 ### **Model and Math**<a name="#model-and-math"></a>
@@ -82,20 +82,21 @@ In pseudo Python code, this will look like
 ```python
 # log_var is used to not get negative variances
 mu, log_var = encoder(X)
+# draw random noise from ~N(0,1) for the reparameterization trick
 epsilon = randomn(0,1, len(mu)) # could also be len(log_var)
 # log_var is assumed to be diagonal here
 z = mu + exp(log_var)**(0.5)*epsilon
 
-# X_hat 
+# reconstruction from the latent space by the decoder
 X_hat = decoder(z)
 
-# Reconstruction loss evaluated on a Gaussian (var is a hyperparameter):
+# Reconstruction loss evaluated on a Gaussian distributed (var is a hyperparameter):
 rec_loss = Gaussian(X, X_hat, var)
 
 # KL divergence between the distribution from z and a standard Gaussian 
 KL_loss = KL(mu, log_var)
 
-loss = rec_loss - KL_loss
+ELBO_loss = -(rec_loss - KL_loss)
 
 # backpropagate and step
 loss.backward()
