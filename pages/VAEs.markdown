@@ -11,10 +11,10 @@ Variational Autoencoders (VAEs) are a class of generative neural networks that c
 **Content**
 * [Intuition](#intuition)  
 * [Model and Math](#model-and-math)  
-* [Variations](#variations)  
+* [Model Variations](#variations)  
 * [Seminal Papers](#seminal-papers)  
-* [Code Repositories](#code-repositories)  
 * [Tricks of the Trade](#tricks-of-the-trade)  
+* [Code Repositories](#code-repositories)  
 &nbsp;
 
 ### **Intuition**<a name="#intuition"></a>
@@ -106,7 +106,7 @@ optimizer.step()
 ```  
 &nbsp;
 
-### **Variations**<a name="#variations"></a>
+### **Model Variations**<a name="#variations"></a>
 
 * [beta-VAE: Learning Basic Visual Concepts with a Constrained Variational Framework (2017)](https://openreview.net/forum?id=Sy2fzU9gl)  
 The authors propose to weight the KL term with hyperparameter $$\beta$$. They show that using $$\beta > 1$$ forces the VAE to learn more disentangled representations.
@@ -127,17 +127,19 @@ Introduction of the VAE as a semi-supervised model
 Original paper on VAEs from Kingma and Welling  
 &nbsp;
 
-### **Code Repositories**<a name="#code-repositories"></a>
- * **Semi-supervised learning with VAEs** [Github](https://github.com/wohlert/semi-supervised-pytorch)  
- Implementation of several models (VAE, Auxiliary VAE, importance weighted, Ladder VAE, normalizing flows, $$\beta$$-VAE), as well as different sampling strategies.  
-&nbsp;
-
 ### **Tricks of the Trade**<a name="#tricks-of-the-trade"></a>
 * **Number of Monte Carlo samples from the latent space**: The most common practice is to have single sample from the latent space
 * **Size of the latent space**: This needs to be explored empirically. However:
     * [Kingma et al. (2014)](https://arxiv.org/abs/1406.5298) uses 50 for MNIST 
 * **KL Warmup**: It is often beneficial to slowly ramp up the KL term (warmup), so it will not dominate the loss
 * **Multiple stochastic layers**: [Maaløe et al. (2016)](https://arxiv.org/abs/1602.05473) states that simply cascading two stochastic layers will not converge
+&nbsp;
+
+
+### **Code Repositories**<a name="#code-repositories"></a>
+ * **Semi-supervised learning with VAEs** [Github](https://github.com/wohlert/semi-supervised-pytorch)  
+ Implementation of several models (VAE, Auxiliary VAE, importance weighted, Ladder VAE, normalizing flows, $$\beta$$-VAE), as well as different sampling strategies.  
+
 
 
 
