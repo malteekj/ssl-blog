@@ -20,8 +20,6 @@ permalink: #/name/
 &nbsp; 
 
 ### **Model and Math**<a name="#model-and-math"></a>
-
-**Derivation from Doersch**  
 &nbsp;
 
 ### **Seminal Papers**<a name="#seminal-papers"></a>
