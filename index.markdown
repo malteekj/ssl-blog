@@ -13,11 +13,10 @@ This log is intended to offer an overview of self-supervised deep learning. Many
 &nbsp; 
 # Topics
 
-## Variational Autoencoders 
-* [VAEs](/ssl-blog/VAEs)
 
-## Innate Relationship 
-* [Innate Relationship](/ssl-blog/innate_relationship)
+## [Variational Autoencoders](/ssl-blog/VAEs)
+
+## [Innate Relationship](/ssl-blog/innate_relationship)
 
 
 <!---  
