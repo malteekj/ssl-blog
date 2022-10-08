@@ -11,8 +11,8 @@ Variational Autoencoders (VAEs) are a class of generative neural networks that c
 **Content**
 * [Intuition](#intuition)  
 * [Model and Math](#model-and-math)  
-* [Model Variations](#variations)  
 * [Seminal Papers](#seminal-papers)  
+* [Model Variations](#variations)  
 * [Tricks of the Trade](#tricks-of-the-trade)  
 * [Code Repositories](#code-repositories)  
 &nbsp;
@@ -106,6 +106,15 @@ optimizer.step()
 ```  
 &nbsp;
 
+### **Seminal Papers**<a name="#seminal-papers"></a>
+* [Tutorial on Variational Autoencoders (2016)](https://arxiv.org/abs/1606.05908)  
+A gentle introduction to the theory and intuition of VAEs, with a different proof than using Jensen's inequality for the ELBO loss
+* [Semi-Supervised Learning with Deep Generative Models (2014)](https://arxiv.org/abs/1406.5298)  
+Introduction of the VAE as a semi-supervised model
+* [Auto-Encoding Variational Bayes (2013)](Auto-Encoding Variational Bayes)  
+Original paper on VAEs from Kingma and Welling  
+&nbsp;
+
 ### **Model Variations**<a name="#variations"></a>
 
 * [beta-VAE: Learning Basic Visual Concepts with a Constrained Variational Framework (2017)](https://openreview.net/forum?id=Sy2fzU9gl)  
@@ -116,15 +125,6 @@ This model adds an extra auxiliary latent to the VAE. As a latent space with a n
 
 * [Ladder Variational Autoencoders (2016)](https://arxiv.org/abs/1602.02282)  
 This model connects latent layers in a similar fashion to the Ladder Network [Rasmus et al. 2015](https://arxiv.org/abs/1507.02672) and [Valpola 2015](https://arxiv.org/abs/1411.7783). The outputs from the encoder and the sampling for the decoder is shared, which creates a more expressive model with hierarchical latent variables.  
-&nbsp;
-
-### **Seminal Papers**<a name="#seminal-papers"></a>
-* [Tutorial on Variational Autoencoders (2016)](https://arxiv.org/abs/1606.05908)  
-A gentle introduction to the theory and intuition of VAEs, with a different proof than using Jensen's inequality for the ELBO loss
-* [Semi-Supervised Learning with Deep Generative Models (2014)](https://arxiv.org/abs/1406.5298)  
-Introduction of the VAE as a semi-supervised model
-* [Auto-Encoding Variational Bayes (2013)](Auto-Encoding Variational Bayes)  
-Original paper on VAEs from Kingma and Welling  
 &nbsp;
 
 ### **Tricks of the Trade**<a name="#tricks-of-the-trade"></a>

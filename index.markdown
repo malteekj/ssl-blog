@@ -16,6 +16,11 @@ This log is intended to offer an overview of self-supervised deep learning. Many
 ## Variational Autoencoders 
 * [VAEs](/ssl-blog/VAEs)
 
+## Innate Relationship 
+* [Innate Relationship](/ssl-blog/innate_relationship)
+
+
+<!---  
 ## Contrastive Methods
 * __Contrastive Objectives__
   * Contrastive loss [(Chopra et al. 2005)](http://yann.lecun.com/exdb/publis/pdf/chopra-05.pdf)
@@ -25,6 +30,8 @@ This log is intended to offer an overview of self-supervised deep learning. Many
   * Multi-Class N-pair loss [(Sohn 2016)](https://papers.nips.cc/paper/2016/file/6b180037abbebea991d8b1232f8a8ca9-Paper.pdf)
   * Info Noise Contrastive Estimation Loss [(van den Oord, et al. 2018)](https://arxiv.org/abs/1807.03748)
   <!--- # FIXME check if the 2007 paper is more relevant/seminal -->
-  * Soft Nearest Neighbors Loss [(Frosst et al. 2019)](http://proceedings.mlr.press/v2/salakhutdinov07a/salakhutdinov07a.pdf)
 
+<!-- 
+  * Soft Nearest Neighbors Loss [(Frosst et al. 2019)](http://proceedings.mlr.press/v2/salakhutdinov07a/salakhutdinov07a.pdf)
+-->
 
