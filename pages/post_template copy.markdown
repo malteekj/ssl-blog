@@ -17,6 +17,7 @@ permalink: #/name/
 &nbsp;
 
 ### **Intuition**<a name="#intuition"></a>
+<!--- Your text here --->
 &nbsp; 
 
 ### **Model and Math**<a name="#model-and-math"></a>
