@@ -2,7 +2,7 @@
 layout: page
 title:  "Innate Relationship"
 date:   2022-10-08 +0100 #2022-02-01 21:52:57 +0100
-permalink: /innate_relationship/
+permalink: /innate-relationship/
 ---
 
 ### **Introduction**

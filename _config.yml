@@ -25,7 +25,7 @@ description: >- # this means to ignore newlines until "baseurl:"
 # baseurl: "/ssl-log" # the subpath of your site, e.g. /blog 
 baseurl: '/ssl-blog'
 #     baseurl needs to be empty for it to work with github
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://malteekj.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
 #twitter_username: jekyllrb
 github_username:  malteekj
 

@@ -21,6 +21,7 @@ This log is intended to offer an overview of self-supervised deep learning. Many
 ## [Innate Relationship](/ssl-blog/innate-relationship)
 
 
+
 <!---  
 ## Contrastive Methods
 * __Contrastive Objectives__

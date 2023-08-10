@@ -25,9 +25,50 @@ Continuing on this thought, one would rightly ask: How do we then define how muc
 
 In this case, we construct tasks where our network will learn features and correlations in our data, but in a more generalized manner. So similar will mean how much the network can compress the input and still solve the given task, and will hence be data driven rather than introduced as a bias from us.
 
+Contrastive loss was first defined by [Bromley et al](https://proceedings.neurips.cc/paper/1993/file/288cc0ff022877bd3df94bc9360b9c5d-Paper.pdf) **(a bit more history)**.
+
 &nbsp; 
 
 ### **Model and Math**<a name="#model-and-math"></a>
+As described in above, contrastive learning can both be supervised or self-supervised. The main difference is how the negative and positive pairs are defined, where in supervised learning they are labelled by hand and in self-supervised learning they are mined.
+
+The objective is to learn a function $$ f_\theta(.): \mathcal{X}\to\mathbb{R}^d $$ for a given set of data points $$ \{ \mathbf{x}_i \} $$, where $$ f_\theta(.) $$ encodes $$x_i$$ into an embedding space, where similar classes are pushed closer together and dissimilar classes further apart. Similar will either refer to a set of corresponding labels $$y_i \in \{1, \dots, L\}$$ for $$ \{ \mathbf{x}_i \} $$ in a supervised setting, otherwise it will depend on a mining heuristic.
+
+
+#### **_Paired Contrastive Loss_** 
+Introduced in [Chopra et al 2005](http://yann.lecun.com/exdb/publis/pdf/chopra-05.pdf), which is one of the earliest uses of the contrastive loss. Here, the contrastive loss takes in pairs of input data points $$ (x_i, x_j) $$ and minimizes the distance between positive pairs in embedding space while maximizing the distance of negative pairs.
+
+$$ \begin{equation} \mathcal{L}(\mathbf{x}_i, \mathbf{x}_j, \theta) = \mathbb{1}[y_i=y_j] \| f_\theta(\mathbf{x}_i) - f_\theta(\mathbf{x}_j) \|^2_2 + \mathbb{1}[y_i\neq y_j]\max(0, \epsilon - \|f_\theta(\mathbf{x}_i) - f_\theta(\mathbf{x}_j)\|_2)^2 \end{equation} $$
+
+Where $$ \epsilon $$ is a hyperparameter that controls the maximum distance between negative pairs, which essentially becomes as target distance for negative pairs.
+
+#### **_Triplet Loss_** 
+Triplet loss uses three data points as input: $$ (\mathbf{x}, \mathbf{x}^+, \mathbf{x}^-) $$, where $$ \mathbf{x} $$ is called the anchor point, and $$ \mathbf{x}^+ $$ and $$ \mathbf{x}^- $$ are a positive and negative pair with $$ \mathbf{x} $$, respectively. It was introduced in FaceNet by [Schroff et al. 2015](https://arxiv.org/abs/1503.03832), where it was used to train a face recognition model of the same person in different poses and angles. The motivation for the triplet loss is to avoid that the classes will be projected onto a single point (as paired contrastive loss encourages), and rather enforce a margin between positive pairs within a class and to the other classes.
+
+<!-- ![triplet loss](/images/contrastive_learning/triplet-loss.png) -->
+
+The triplet loss is given by the following equation:
+
+$$ \begin{equation}
+\mathcal{L}_(\mathbf{x}, \mathbf{x}^+, \mathbf{x}^-) = \sum_{\mathbf{x} \in \mathcal{X}} \max\big( 0, \|f(\mathbf{x}) - f(\mathbf{x}^+)\|^2_2 - \|f(\mathbf{x}) - f(\mathbf{x}^-)\|^2_2 + \epsilon \big)
+\end{equation} $$ 
+
+Where $$ \epsilon $$ is a hyperparameter controlling how much further away $$ \mathbf{x}^- $$ can be from the anchor compared to $$ \mathbf{x}^+ $$. That is, if e.g. $$ \|f(\mathbf{x}) - f(\mathbf{x}^+)\|^2_2 = 1 $$, then $$ \|f(\mathbf{x}) - f(\mathbf{x}^-)\|^2_2 \leq 1 + \epsilon $$. It is crucial to continually mine triplets during training that are in most violation with with the above equation for effective training and convergence.  
+
+<!-- 
+The motivation is that the loss
+from [14] encourages all faces of one identity to be pro-
+jected onto a single point in the embedding space. The
+triplet loss, however, tries to enforce a margin between each
+pair of faces from one person to all other faces. This al-
+lows the faces for one identity to live on a manifold, while
+still enforcing the distance and thus discriminability to other
+identities. -->
+
+
+
+
+
 &nbsp;
 
 ### **Seminal Papers**<a name="#seminal-papers"></a>
