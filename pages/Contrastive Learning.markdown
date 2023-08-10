@@ -45,7 +45,9 @@ Where $$ \epsilon $$ is a hyperparameter that controls the maximum distance betw
 #### **_Triplet Loss_** 
 Triplet loss uses three data points as input: $$ (\mathbf{x}, \mathbf{x}^+, \mathbf{x}^-) $$, where $$ \mathbf{x} $$ is called the anchor point, and $$ \mathbf{x}^+ $$ and $$ \mathbf{x}^- $$ are a positive and negative pair with $$ \mathbf{x} $$, respectively. It was introduced in FaceNet by [Schroff et al. 2015](https://arxiv.org/abs/1503.03832), where it was used to train a face recognition model of the same person in different poses and angles. The motivation for the triplet loss is to avoid that the classes will be projected onto a single point (as paired contrastive loss encourages), and rather enforce a margin between positive pairs within a class and to the other classes.
 
-<!-- ![triplet loss](/images/contrastive_learning/triplet-loss.png) -->
+![](../images/contrastive_learning/triplet-loss.png)
+*Fig. 1: Triplet loss showing positives being pushed closer to the anchor and negative further away. (Image source: [Schroff et al. 2015](https://arxiv.org/abs/1503.03832))*
+
 
 The triplet loss is given by the following equation:
 

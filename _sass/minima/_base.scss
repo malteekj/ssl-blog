@@ -55,9 +55,30 @@ main {
  * Images
  */
 img {
-  max-width: 100%;
-  vertical-align: middle;
+  max-width: 70%;
+  margin: auto;
+  display: block;
+  // vertical-align: middle;
 }
+
+// .image-caption {
+//   // max-width: 70%;
+//   // width: 70%;
+//   // margin: auto;
+//   // inline-size: 70%;
+//   overflow-wrap: break-word;
+//   text-align: center;
+//   color: grey;
+// }
+
+img + em { 	
+  display:block;
+  max-width: 80%;
+  margin: auto;
+  overflow-wrap: break-word;
+  text-align: center;
+  color: grey;
+} 
 
 
 
