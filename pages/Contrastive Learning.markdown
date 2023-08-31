@@ -45,7 +45,7 @@ Where $$ \epsilon $$ is a hyperparameter that controls the maximum distance betw
 #### **_Triplet Loss_** 
 Triplet loss uses three data points as input: $$ (\mathbf{x}, \mathbf{x}^+, \mathbf{x}^-) $$, where $$ \mathbf{x} $$ is called the anchor point, and $$ \mathbf{x}^+ $$ and $$ \mathbf{x}^- $$ are a positive and negative pair with $$ \mathbf{x} $$, respectively. It was introduced in FaceNet by [Schroff et al. 2015](https://arxiv.org/abs/1503.03832), where it was used to train a face recognition model of the same person in different poses and angles. The motivation for the triplet loss is to avoid that the classes will be projected onto a single point (as paired contrastive loss encourages), and rather enforce a margin between positive pairs within a class and to the other classes.
 
-![](../images/contrastive_learning/triplet-loss.png)
+![](../images/contrastive_learning/triplet-loss.png){:width="70%"}
 *Fig. 1: Triplet loss showing positives being pushed closer to the anchor and negative further away. (Image source: [Schroff et al. 2015](https://arxiv.org/abs/1503.03832))*
 
 
@@ -57,18 +57,78 @@ $$ \begin{equation}
 
 Where $$ \epsilon $$ is a hyperparameter controlling how much further away $$ \mathbf{x}^- $$ can be from the anchor compared to $$ \mathbf{x}^+ $$. That is, if e.g. $$ \|f(\mathbf{x}) - f(\mathbf{x}^+)\|^2_2 = 1 $$, then $$ \|f(\mathbf{x}) - f(\mathbf{x}^-)\|^2_2 \leq 1 + \epsilon $$. It is crucial to continually mine triplets during training that are in most violation with with the above equation for effective training and convergence.  
 
-<!-- 
-The motivation is that the loss
-from [14] encourages all faces of one identity to be pro-
-jected onto a single point in the embedding space. The
-triplet loss, however, tries to enforce a margin between each
-pair of faces from one person to all other faces. This al-
-lows the faces for one identity to live on a manifold, while
-still enforcing the distance and thus discriminability to other
-identities. -->
+#### **_Lifted Structural Loss_** 
+Lifted structural loss compares the distance between a positive pair $$ (\mathbf{x}_i, \mathbf{x}_j) \in \mathcal{P} $$ with all observations that forms negative pairs with them within a training batch $$ \mathbf{x}_k \in \mathcal{N} $$ where, respectively, $$ \mathcal{P} $$ is the set of positive pairs and $$ \mathcal{N} $$ is the set of negative pairs for at given positive pair in $$ \mathcal{P} $$. It was introduced by [Song et al. 2015](https://arxiv.org/abs/1511.06452).
+
+![](../images/contrastive_learning/lifted-structured-loss.png){:width="45%"}
+*Fig. 2: Illustrates the difference between paired contrastive loss, triplet loss and lifted structured loss. (Image source: [Song et al. 2015](https://arxiv.org/abs/1511.06452))*
+
+The lifted structured loss is formulated as:
+
+$$ \begin{aligned}
+\mathcal{L} &= \frac{1}{2\vert \mathcal{P} \vert} \sum_{(i,j) \in \mathcal{P}} \max(0, \mathcal{L}_\text{struct}^{(ij)})^2 \\
+\text{where } \mathcal{L}^{(ij)} &= D_{ij} + {\max \big( \max_{(i,k)\in \mathcal{N}} \epsilon - D_{ik}, \max_{(j,l)\in \mathcal{N}} \epsilon - D_{jl} \big)} \\
+\text{and } D_{ij} &= \vert f(\mathbf{x}_i) - f(\mathbf{x}_j) \vert_2
+\end{aligned} $$
+
+All the pairwise distances are calculated within each training batch. Notice that $$ {\max \big( \max_{(i,k)\in \mathcal{N}} \epsilon - D_{ik}, \max_{(j,l)\in \mathcal{N}} \epsilon - D_{jl} \big)} $$ is used mine the observation that has the greatest distance to the positive pair $$ (\mathbf{x}_i, \mathbf{x}_j) $$, which just like in triplet loss is important for effective training and convergence. Further, it is not a smooth function which can lead to problems which convergence and ending in a poor local optimum. The authors therefore relax this part to:
+
+$$ 
+\mathcal{L}^{(ij)} = D_{ij} + \log \Big( \sum_{(i,k)\in\mathcal{N}} \exp(\epsilon - D_{ik}) + \sum_{(j,l)\in\mathcal{N}} \exp(\epsilon - D_{jl}) \Big)
+$$
+
+The authors emphasize the importance of incorporating hard examples into each batch for better convergence. \<a little more about the details in the paper\>
+
+#### **_N-pair Loss_** 
+Multi-class N-pair loss extends the idea of triplet loss to compare the anchor point to multiple negative samples rather than one negative pair. It was introduced by [Sohn 2016](https://papers.nips.cc/paper/2016/hash/6b180037abbebea991d8b1232f8a8ca9-Abstract.html).
+
+![](../images/contrastive_learning/N_pair_loss.png){:width="85%"}
+*Fig. 2: Illustration of the difference between triplet loss (left) and N-pair loss (right). Red dots are negative pairs and blue dots are positive pairs. Notice this figure is different form the original one which had some typos. (Image source: [Sohn 2016](https://papers.nips.cc/paper/2016/hash/6b180037abbebea991d8b1232f8a8ca9-Abstract.html))*
+
+In the N-pair loss we have a training batch consisting of a $$ (N + 1) $$ tuplet $$ \{ \mathbf{x}, \mathbf{x}^+, \mathbf{x}^-_1, \dots, \mathbf{x}^-_{N-1} \} $$ with one anchor point, one sample that constitutes a positive pair with the anchor and $$ N-1 $$ negatives samples that constitutes negative pairs. The loss is defined as:
+
+$$ \begin{aligned}
+\mathcal{L}(\mathbf{x}, \mathbf{x}^+, \mathbf{x}^-_1, \dots, \mathbf{x}^-_{N-1}) 
+&= \log\big(1 + \sum_{i=1}^{N-1} \exp(f(\mathbf{x})^\top f(\mathbf{x}^-_i) - f(\mathbf{x})^\top f(\mathbf{x}^+))\big) \\
+&= -\log\frac{\exp(f(\mathbf{x})^\top f(\mathbf{x}^+))}{\exp(f(\mathbf{x})^\top f(\mathbf{x}^+)) + \sum_{i=1}^{N-1} \exp(f(\mathbf{x})^\top f(\mathbf{x}^-_i))}
+\end{aligned} $$
+
+Where $$ f(\mathbf{x}) $$ is the embedding function of the observation (usually a neural network). The motivation behind the N-pair loss is that when using the triplet loss, we are only guaranteed to be far from the selected negative sample but not necessarily the other negative samples. Hence, we risk only differentiating the positive and negative pairs from few samples, while other negative samples might still remain closer to the positive one. This helps stabilize and speed up convergence.
+
+The loss collapses into normal softmax loss for a multi-class classification if only one negative sample is made per class. Notice the author uses the (un-normalized) inner product of the embedding vectors as the distance measure, but regularize the $$ L^2 $$ norm of the embedding vectors instead of normalizing.  
+
+#### **Noise Contrastive Estimation (NCE)** 
+NCE is a contrastive method where the distance between pairs is formulated as a logistic regression problem rather than a metric distance. We are contrasting a target class $$ \mathbf{x} $$ with a noise class $$ \mathbf{\tilde x} $$, which in a supervised setting corresponds to a binary classification problem. In SSL, this would correspond to negative and positive pairs we would have to mine.
+
+In this setting, the embedding function, called $$  p_m^0(\;\cdot \; ;\alpha) $$ in the paper, does not necessary integrate to 1 (i.e. is not a probability distribution), akin to an energy function. The normalization constant that makes it sum to 1 is thus part of the parameters to be optimized, i.e. $$  p_m(\;\cdot \; ;\theta) = p_m^0(\;\cdot \; ;\alpha)/c $$, where $$ \theta = \{\alpha, c\} $$. The point here is that we do not need to chose a probability function upfront, but can rather learn an embedding function and normalize as part of the optimization. This makes the model more flexible.
+
+We assume that the target class follows the distribution $$ \mathbf{x} \sim P(\mathbf{x} \vert C=1; \theta) = p_m(\mathbf{x};\theta) $$ and the noise distribution $$ \mathbf{\tilde x} \sim  P(\tilde{\mathbf{x}} \vert C=0) = p_n(\tilde{\mathbf{x}}) $$
+
+We are modelling the logits of a sample $$ \mathbf{u} $$ belonging to the target distribution:
+
+$$ \begin{aligned}
+G(\mathbf{u}) = \log \frac{p_m(\mathbf{x};\theta)}{p_n(\mathbf{x}) } = \log p_m(\mathbf{x};\theta) - \log p_n(\mathbf{x}) 
+\end{aligned} $$
+
+We use the logistic function to uptain probabilities for each classes
+
+$$ \begin{aligned}
+\sigma(G) &= \frac{1}{1 + \exp(-G)} =  \frac{p_m(\mathbf{x};\theta)}{p_m(\mathbf{x};\theta) + p_n(\mathbf{x}) }
+\end{aligned} $$
+
+The objective function then becomes:
+
+$$ \begin{aligned}
+\mathcal{L} = - \frac{1}{2N} \sum_{i=1}^N \big[ \log \sigma (G(\mathbf{x}_i)) + \log (1 - \sigma (G(\tilde{\mathbf{x}}_i))) \big] 
+\end{aligned}
+$$
+
+The objective function is hence maximizing the discrimination between the target distribution and noise distribution. In SSL, this would correspond to discriminating between the positive and negative samples. 
 
 
-
+<!-- - We are modelling the samples and noise by a logistic regression, to tell then apart
+- This is modelled as their log odds ratio
+    - but why not just model it as a probability? -->
 
 
 &nbsp;
@@ -80,6 +140,12 @@ identities. -->
 &nbsp;
 
 ### **Tricks of the Trade**<a name="#tricks-of-the-trade"></a>
+* \<choosing sampling strategies for choosing hard examples within a batch for better convergence\>
+<!-- questions:
+- why is the focus on using one positive example against several negatives rather than multiple of each?
+ -->
+
+
 &nbsp;
 
 
