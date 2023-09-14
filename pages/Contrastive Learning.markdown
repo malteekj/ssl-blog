@@ -125,10 +125,48 @@ $$
 
 The objective function is hence maximizing the discrimination between the target distribution and noise distribution. In SSL, this would correspond to discriminating between the positive and negative samples. 
 
-
 <!-- - We are modelling the samples and noise by a logistic regression, to tell then apart
 - This is modelled as their log odds ratio
     - but why not just model it as a probability? -->
+
+
+#### **InfoNCE** 
+InfoNCE aims at predicting the next patches in a signal or an images, by predicting their latent representation rather than fully reconstruct the signal or image. The reasoning behind this is that both signals and images often contain high frequency features (i.e. very local details), which are not important for a classification task. Generative models often use the MSE to evaluate the generated samples, which is very computationally expensive (and often unnecessary).
+
+The InfoNCE loss optimizes the negative log probability of classifying the positive sample correctly:
+
+$$\begin{align}
+\mathcal{L} = - \mathbb{E} \Big[\log \frac{f(\mathbf{x}, \mathbf{c})}{\sum_{\mathbf{x}' \in X} f(\mathbf{x}', \mathbf{c})} \Big]
+\end{align}$$
+
+The fact that $$ f(x, c) $$ estimates the density ratio $$ \frac{p(x\vert c)}{p(x)} $$ has a connection with mutual information optimization. To maximize the the mutual information between input $$ x $$ and context vector $$ c $$, we have:
+
+$$\begin{align}
+I(\mathbf{x}; \mathbf{c}) = \sum_{\mathbf{x}, \mathbf{c}} p(\mathbf{x}, \mathbf{c}) \log\frac{p(\mathbf{x}, \mathbf{c})}{p(\mathbf{x})p(\mathbf{c})} = \sum_{\mathbf{x}, \mathbf{c}} p(\mathbf{x}, \mathbf{c})\log{\frac{p(\mathbf{x}|\mathbf{c})}{p(\mathbf{x})}}
+\end{align}$$
+
+For sequence prediction tasks, rather than modeling the future observations $$ p_k(\mathbf{x}_{t+k} \vert \mathbf{c}_t) $$ directly (which could be fairly expensive), CPC models a density function to preserve the mutual information between $$ \mathbf{x}_{t+k} $$ and $$ \mathbf{c}_t $$:
+
+$$\begin{align}
+f_k(\mathbf{x}_{t+k}, \mathbf{c}_t) \propto \frac{p(\mathbf{x}_{t+k}\vert\mathbf{c}_t)}{p(\mathbf{x}_{t+k})}
+\end{align}$$
+
+Notice here that the ratio between the two densities $$ f $$ does not have to be normalized (i.e. integrate to 1). Any positive real score can be used, and the authors chose to use a log-bilinear model:
+
+$$\begin{align}
+f_k(\mathbf{x}_{t+k}, \mathbf{c}_t) = \exp(\mathbf{z}_{t+k}^\top \mathbf{W}_k \mathbf{c}_t)
+\end{align}$$
+
+Where $$ \mathbf{W}_k \mathbf{c}_t $$ become the prediction of $$ \mathbf{z}_{t+k} $$, i.e. $$ \mathbf{\tilde{z}}_{t+k} = \mathbf{W}_k \mathbf{c}_t $$, and the inner product between $$ \mathbf{z}_{t+k} $$ and $$ \mathbf{\tilde{z}}_{t+k} $$ thus becomes the similarity between prediction of the latent representation at time step $$ t+k $$ and the embedded latent representation.
+
+
+<!-- 
+Questions:
+ - Since we are essentially modelling the inner product of the z and z_pred, what exactly makes
+    this a probabilistic model?
+
+
+ -->
 
 
 &nbsp;
