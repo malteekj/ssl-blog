@@ -97,8 +97,8 @@ Where $$ f(\mathbf{x}) $$ is the embedding function of the observation (usually 
 
 The loss collapses into normal softmax loss for a multi-class classification if only one negative sample is made per class. Notice the author uses the (un-normalized) inner product of the embedding vectors as the distance measure, but regularize the $$ L^2 $$ norm of the embedding vectors instead of normalizing.  
 
-#### **Noise Contrastive Estimation (NCE)** 
-NCE is a contrastive method where the distance between pairs is formulated as a logistic regression problem rather than a metric distance. We are contrasting a target class $$ \mathbf{x} $$ with a noise class $$ \mathbf{\tilde x} $$, which in a supervised setting corresponds to a binary classification problem. In SSL, this would correspond to negative and positive pairs we would have to mine.
+#### **_Noise Contrastive Estimation (NCE)_** 
+NCE is a contrastive method where the distance between pairs is formulated as a logistic regression problem rather than a metric distance. We are contrasting a target class $$ \mathbf{x} $$ with a noise class $$ \mathbf{\tilde x} $$, which in a supervised setting corresponds to a binary classification problem. In SSL, this would correspond to negative and positive pairs we would have to mine. It was introduced by [Gutmann & Hyvarinen 2010](http://proceedings.mlr.press/v9/gutmann10a.html)
 
 In this setting, the embedding function, called $$  p_m^0(\;\cdot \; ;\alpha) $$ in the paper, does not necessary integrate to 1 (i.e. is not a probability distribution), akin to an energy function. The normalization constant that makes it sum to 1 is thus part of the parameters to be optimized, i.e. $$  p_m(\;\cdot \; ;\theta) = p_m^0(\;\cdot \; ;\alpha)/c $$, where $$ \theta = \{\alpha, c\} $$. The point here is that we do not need to chose a probability function upfront, but can rather learn an embedding function and normalize as part of the optimization. This makes the model more flexible.
 
@@ -130,41 +130,51 @@ The objective function is hence maximizing the discrimination between the target
     - but why not just model it as a probability? -->
 
 
-#### **InfoNCE** 
-InfoNCE aims at predicting the next patches in a signal or an images, by predicting their latent representation rather than fully reconstruct the signal or image. The reasoning behind this is that both signals and images often contain high frequency features (i.e. very local details), which are not important for a classification task. Generative models often use the MSE to evaluate the generated samples, which is very computationally expensive (and often unnecessary).
+#### **_InfoNCE_** 
+InfoNCE aims at maximizing the mutual information between the embedding of the next patches in a signal and the prediction of the embedding from the current patch. By predicting the latent representation of the next patch, the patch does not need to be fully reconstructed for training. It was introduced by [van den Oord et al. 2018](https://arxiv.org/abs/1807.03748). The reasoning behind this is that both signals and images often contain high frequency features (i.e. very local details), which are not important for a classification task. In generative models that uses e.g. MSE as loss, these high frequency details are also reconstructed, which is wasteful and possibly detrimental for downstream classification. 
 
-The InfoNCE loss optimizes the negative log probability of classifying the positive sample correctly:
+The model work by taking in a signal or image $$ \mathbf{X} $$ and dividing it into patches $$ {\mathbf{x}_t} $$. Each patch is then encoded into a latent representation $$ g_{enc}(\mathbf{x}_t) = \mathbf{z}_t $$, and an autoregressive model takes in $$ \mathbf{z}_{\leq t} $$ and outputs a context vector $$ \mathbf{c}_t $$, $$ g_{ar}(\mathbf{z}_{\leq t}) = \mathbf{c}_t $$. A positive sample is sampled from the conditional distribution $$ p(\mathbf{x}\vert \mathbf{c}) $$ and $$ N-1 $$ negative samples are sampled from the noise distribution $$ p(\mathbf{x}) $$ in each batch.
+
+Using Bayes' Theorem, the probability of detecting the positive sample is:
+
+$$\begin{align}
+p(C=\texttt{pos} \vert X, \mathbf{c}) 
+= \frac{p(x_\texttt{pos} \vert \mathbf{c}) \prod_{i=1,\dots,N; i \neq \texttt{pos}} p(\mathbf{x}_i)}{\sum_{j=1}^N \big[ p(\mathbf{x}_j \vert \mathbf{c}) \prod_{i=1,\dots,N; i \neq j} p(\mathbf{x}_i) \big]}
+= \frac{ \frac{p(\mathbf{x}_\texttt{pos}\vert c)}{p(\mathbf{x}_\texttt{pos})} }{ \sum_{j=1}^N \frac{p(\mathbf{x}_j\vert \mathbf{c})}{p(\mathbf{x}_j)} }
+= \frac{f(\mathbf{x}_\texttt{pos}, \mathbf{c})}{ \sum_{j=1}^N f(\mathbf{x}_j, \mathbf{c}) }
+\end{align}$$
+
+Hence the scoring function is proportional to: $$ f(\mathbf{x}, \mathbf{c}) \propto \frac{p(\mathbf{x}\vert\mathbf{c})}{p(\mathbf{x})} $$. The InfoNCE loss optimizes the negative log probability of classifying the positive sample correctly:
 
 $$\begin{align}
 \mathcal{L} = - \mathbb{E} \Big[\log \frac{f(\mathbf{x}, \mathbf{c})}{\sum_{\mathbf{x}' \in X} f(\mathbf{x}', \mathbf{c})} \Big]
 \end{align}$$
 
-The fact that $$ f(x, c) $$ estimates the density ratio $$ \frac{p(x\vert c)}{p(x)} $$ has a connection with mutual information optimization. To maximize the the mutual information between input $$ x $$ and context vector $$ c $$, we have:
+Since $$ f(\mathbf{x}, \mathbf{c}) $$ estimates the density ratio $$ \frac{p(x\vert c)}{p(x)} $$ it can be related to mutual information optimization. The mutual information between input $$ \mathbf{x} $$ and context vector $$ \mathbf{c} $$ can be rewritten, such that the relation to $$ \frac{p(\mathbf{x}\vert \mathbf{c})}{p(\mathbf{x})} $$ becomes clear:
 
 $$\begin{align}
 I(\mathbf{x}; \mathbf{c}) = \sum_{\mathbf{x}, \mathbf{c}} p(\mathbf{x}, \mathbf{c}) \log\frac{p(\mathbf{x}, \mathbf{c})}{p(\mathbf{x})p(\mathbf{c})} = \sum_{\mathbf{x}, \mathbf{c}} p(\mathbf{x}, \mathbf{c})\log{\frac{p(\mathbf{x}|\mathbf{c})}{p(\mathbf{x})}}
 \end{align}$$
 
-For sequence prediction tasks, rather than modeling the future observations $$ p_k(\mathbf{x}_{t+k} \vert \mathbf{c}_t) $$ directly (which could be fairly expensive), CPC models a density function to preserve the mutual information between $$ \mathbf{x}_{t+k} $$ and $$ \mathbf{c}_t $$:
+As the described earlier, we want to avoid modeling the future observations $$ p_k(\mathbf{x}_{t+k} \vert \mathbf{c}_t) $$ directly (i.e. generate/reconstruct the original signal). Rather, we CPC models a density function to preserve the mutual information between $$ \mathbf{x}_{t+k} $$ and $$ \mathbf{c}_t $$:
 
 $$\begin{align}
 f_k(\mathbf{x}_{t+k}, \mathbf{c}_t) \propto \frac{p(\mathbf{x}_{t+k}\vert\mathbf{c}_t)}{p(\mathbf{x}_{t+k})}
 \end{align}$$
 
-Notice here that the ratio between the two densities $$ f $$ does not have to be normalized (i.e. integrate to 1). Any positive real score can be used, and the authors chose to use a log-bilinear model:
+Notice here that the ratio between the two densities $$ f $$ does not have to be normalized (i.e. integrate to 1). Any positive real score can be used. The authors chose to use a log-bilinear model:
 
 $$\begin{align}
 f_k(\mathbf{x}_{t+k}, \mathbf{c}_t) = \exp(\mathbf{z}_{t+k}^\top \mathbf{W}_k \mathbf{c}_t)
 \end{align}$$
 
-Where $$ \mathbf{W}_k \mathbf{c}_t $$ become the prediction of $$ \mathbf{z}_{t+k} $$, i.e. $$ \mathbf{\tilde{z}}_{t+k} = \mathbf{W}_k \mathbf{c}_t $$, and the inner product between $$ \mathbf{z}_{t+k} $$ and $$ \mathbf{\tilde{z}}_{t+k} $$ thus becomes the similarity between prediction of the latent representation at time step $$ t+k $$ and the embedded latent representation.
-
+Where $$ \mathbf{W}_k \mathbf{c}_t $$ becomes the prediction of $$ \mathbf{z}_{t+k} $$, i.e. $$ \mathbf{\tilde{z}}_{t+k} = \mathbf{W}_k \mathbf{c}_t $$ (with a different $$ \mathbf{W}_k $$ for each timestep k), and the inner product between $$ \mathbf{z}_{t+k} $$ and $$ \mathbf{\tilde{z}}_{t+k} $$ thus becomes the similarity between the prediction of the latent representation at time step $$ t+k $$ and the embedded latent representation.
 
 <!-- 
 Questions:
+ - How is W_k used and generated? Is it recursively updated or outputted by the network?
  - Since we are essentially modelling the inner product of the z and z_pred, what exactly makes
     this a probabilistic model?
-
 
  -->
 
@@ -172,13 +182,33 @@ Questions:
 &nbsp;
 
 ### **Seminal Papers**<a name="#seminal-papers"></a>
+
+#### _Constrastive loss_
+- [Learning a Similarity Metric Discriminatively, with Application to Face
+Verification (Chopra et al. 2005)](http://yann.lecun.com/exdb/publis/pdf/chopra-05.pdf)
+    - Simple paired contrastive loss.
+- [FaceNet: A Unified Embedding for Face Recognition and Clustering (Schroff et al. 2015)](https://arxiv.org/abs/1503.03832)
+    - Triplet loss with an anker point and a positive and negative sample.
+- [Deep Metric Learning via Lifted Structured Feature Embedding (Song et al. 2015)](https://arxiv.org/abs/1511.06452)
+    - Lifted structural loss with comparison among all inputs in the batch.
+- [Improved Deep Metric Learning with Multi-class N-pair Loss Objective (Sohn 2016)](https://papers.nips.cc/paper/2016/hash/6b180037abbebea991d8b1232f8a8ca9-Abstract.html)
+    - N-pair loss.
+- [Noise-contrastive estimation: A new estimation principle for unnormalized statistical models (Gutmann & Hyvarinen 2010)](http://proceedings.mlr.press/v9/gutmann10a.html)
+    - Noise contrastive estimation (NCE).
+- [Representation Learning with Contrastive Predictive Coding (van den Oord et al. 2018)](https://arxiv.org/abs/1807.03748)
+    - InfoNCE (builds upon NCE with mutual information)
+
+
+
 &nbsp;
 
 ### **Model Variations**<a name="#variations"></a>
 &nbsp;
 
 ### **Tricks of the Trade**<a name="#tricks-of-the-trade"></a>
-* \<choosing sampling strategies for choosing hard examples within a batch for better convergence\>
+- \<choosing sampling strategies for choosing hard examples within a batch for better convergence\>
+
+
 <!-- questions:
 - why is the focus on using one positive example against several negatives rather than multiple of each?
  -->
