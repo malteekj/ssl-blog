@@ -61,7 +61,7 @@ Where $$ \epsilon $$ is a hyperparameter controlling how much further away $$ \m
 Lifted structural loss compares the distance between a positive pair $$ (\mathbf{x}_i, \mathbf{x}_j) \in \mathcal{P} $$ with all observations that forms negative pairs with them within a training batch $$ \mathbf{x}_k \in \mathcal{N} $$ where, respectively, $$ \mathcal{P} $$ is the set of positive pairs and $$ \mathcal{N} $$ is the set of negative pairs for at given positive pair in $$ \mathcal{P} $$. It was introduced by [Song et al. 2015](https://arxiv.org/abs/1511.06452).
 
 ![](../images/contrastive_learning/lifted-structured-loss.png){:width="45%"}
-*Fig. 2: Illustrates the difference between paired contrastive loss, triplet loss and lifted structured loss. (Image source: [Song et al. 2015](https://arxiv.org/abs/1511.06452))*
+*Fig. 3: Illustrates the difference between paired contrastive loss, triplet loss and lifted structured loss. (Image source: [Song et al. 2015](https://arxiv.org/abs/1511.06452))*
 
 The lifted structured loss is formulated as:
 
@@ -83,7 +83,7 @@ The authors emphasize the importance of incorporating hard examples into each ba
 Multi-class N-pair loss extends the idea of triplet loss to compare the anchor point to multiple negative samples rather than one negative pair. It was introduced by [Sohn 2016](https://papers.nips.cc/paper/2016/hash/6b180037abbebea991d8b1232f8a8ca9-Abstract.html).
 
 ![](../images/contrastive_learning/N_pair_loss.png){:width="85%"}
-*Fig. 2: Illustration of the difference between triplet loss (left) and N-pair loss (right). Red dots are negative pairs and blue dots are positive pairs. Notice this figure is different form the original one which had some typos. (Image source: [Sohn 2016](https://papers.nips.cc/paper/2016/hash/6b180037abbebea991d8b1232f8a8ca9-Abstract.html))*
+*Fig. 3: Illustration of the difference between triplet loss (left) and N-pair loss (right). Red dots are negative pairs and blue dots are positive pairs. Notice this figure is different form the original one which had some typos. (Image source: [Sohn 2016](https://papers.nips.cc/paper/2016/hash/6b180037abbebea991d8b1232f8a8ca9-Abstract.html))*
 
 In the N-pair loss we have a training batch consisting of a $$ (N + 1) $$ tuplet $$ \{ \mathbf{x}, \mathbf{x}^+, \mathbf{x}^-_1, \dots, \mathbf{x}^-_{N-1} \} $$ with one anchor point, one sample that constitutes a positive pair with the anchor and $$ N-1 $$ negatives samples that constitutes negative pairs. The loss is defined as:
 
@@ -135,6 +135,9 @@ InfoNCE aims at maximizing the mutual information between the embedding of the n
 
 The model work by taking in a signal or image $$ \mathbf{X} $$ and dividing it into patches $$ {\mathbf{x}_t} $$. Each patch is then encoded into a latent representation $$ g_{enc}(\mathbf{x}_t) = \mathbf{z}_t $$, and an autoregressive model takes in $$ \mathbf{z}_{\leq t} $$ and outputs a context vector $$ \mathbf{c}_t $$, $$ g_{ar}(\mathbf{z}_{\leq t}) = \mathbf{c}_t $$. A positive sample is sampled from the conditional distribution $$ p(\mathbf{x}\vert \mathbf{c}) $$ and $$ N-1 $$ negative samples are sampled from the noise distribution $$ p(\mathbf{x}) $$ in each batch.
 
+![](../images/contrastive_learning/contrast_predictive_coding_signal.png){:width="85%"}
+*Fig. 4: Illustration of contrastive prediction coding on a signal. (Image source: [van den Oord et al. 2018](https://arxiv.org/abs/1807.03748))*
+
 Using Bayes' Theorem, the probability of detecting the positive sample is:
 
 $$\begin{align}
@@ -169,6 +172,10 @@ f_k(\mathbf{x}_{t+k}, \mathbf{c}_t) = \exp(\mathbf{z}_{t+k}^\top \mathbf{W}_k \m
 \end{align}$$
 
 Where $$ \mathbf{W}_k \mathbf{c}_t $$ becomes the prediction of $$ \mathbf{z}_{t+k} $$, i.e. $$ \mathbf{\tilde{z}}_{t+k} = \mathbf{W}_k \mathbf{c}_t $$ (with a different $$ \mathbf{W}_k $$ for each timestep k), and the inner product between $$ \mathbf{z}_{t+k} $$ and $$ \mathbf{\tilde{z}}_{t+k} $$ thus becomes the similarity between the prediction of the latent representation at time step $$ t+k $$ and the embedded latent representation.
+
+![](../images/contrastive_learning/contrast_predictive_coding_images.png){:width="85%"}
+*Fig. 5: Illustration of contrastive prediction coding on an image. (Image source: [van den Oord et al. 2018](https://arxiv.org/abs/1807.03748))*
+
 
 <!-- 
 Questions:
