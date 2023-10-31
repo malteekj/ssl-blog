@@ -176,7 +176,6 @@ Where $$ \mathbf{W}_k \mathbf{c}_t $$ becomes the prediction of $$ \mathbf{z}_{t
 ![](../images/contrastive_learning/contrast_predictive_coding_images.png){:width="85%"}
 *Fig. 5: Illustration of contrastive prediction coding on an image. (Image source: [van den Oord et al. 2018](https://arxiv.org/abs/1807.03748))*
 
-
 <!-- 
 Questions:
  - How is W_k used and generated? Is it recursively updated or outputted by the network?
@@ -185,6 +184,26 @@ Questions:
 
  -->
 
+#### **_Soft-Nearest Neighbors Loss_** 
+In the soft-Nearest Neighbors loss, the distance between samples of positive pairs should be small relative to the distances of samples that form negative pairs. It is a soft nearest neighbor, as the distances within a positive class is normalized to the total distances across all classes. It was introduced in [Salakhutdinov & Hinton 2007](http://proceedings.mlr.press/v2/salakhutdinov07a.html) and [Frosst et al. 2019](https://arxiv.org/abs/1902.01889) 
+
+The probability of each observation pair $$ (\mathbf{x_a}, \mathbf{x}_b) $$ to belong together is:
+
+$$ \begin{equation}
+p_{a b}=\frac{\exp \left(-d_{a b}\right)}{\sum_{z \neq a} \exp \left(-d_{a z}\right)}, \quad \quad p_{a a}=0
+\end{equation} $$
+
+Wher $$ d_{a b} $$ is some distance measure in the latent space, e.g. Euclidean distance. The probability of observation $$ \mathbf{x_a} $$ belonging to class $$ c^a = k $$ is then:
+
+$$\begin{align}
+p\left(c^a=k\right)=\sum_{b: c^b=k} p_{a b}
+\end{align}$$
+
+In an SSL setting, the class would correspond the mined positive and negative pairs. Collectively, the objective becomes to maximize the log probability of each observation $$ \mathbf{x_a} $$ being classified to belong to correct designated class of the observation. 
+
+$$\begin{align}
+\mathcal{L} = -\frac{1}{B}\sum_{i=1}^B \log \frac{\sum_{i\neq j, y_i = y_j, j=1,\dots,B} \exp(- f(\mathbf{x}_i, \mathbf{x}_j) / \tau)}{\sum_{i\neq k, k=1,\dots,B} \exp(- f(\mathbf{x}_i, \mathbf{x}_k) /\tau)}
+\end{align}$$
 
 &nbsp;
 
