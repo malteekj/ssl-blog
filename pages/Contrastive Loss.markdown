@@ -1,8 +1,8 @@
 ---
 layout: page
-title:  "Contrastive Learning"
+title:  "Contrastive Loss"
 date:   2023-08-04 21:52:57 +0100 #2022-02-01 21:52:57 +0100
-permalink: /contrastive-learning/
+permalink: /contrastive-loss/
 ---
 
 ### **Introduction**
@@ -32,21 +32,22 @@ Contrastive loss was first defined by [Bromley et al](https://proceedings.neurip
 ### **Model and Math**<a name="#model-and-math"></a>
 As described in above, contrastive learning can both be supervised or self-supervised. The main difference is how the negative and positive pairs are defined, where in supervised learning they are labelled by hand and in self-supervised learning they are mined.
 
-The objective is to learn a function $$ f_\theta(.): \mathcal{X}\to\mathbb{R}^d $$ for a given set of data points $$ \{ \mathbf{x}_i \} $$, where $$ f_\theta(.) $$ encodes $$x_i$$ into an embedding space, where similar classes are pushed closer together and dissimilar classes further apart. Similar will either refer to a set of corresponding labels $$y_i \in \{1, \dots, L\}$$ for $$ \{ \mathbf{x}_i \} $$ in a supervised setting, otherwise it will depend on a mining heuristic.
-
+The objective is to learn a function $$ f_\theta(.): \mathcal{X}\to\mathbb{R}^d $$ for a given set of data points $$ \{ \mathbf{x}_i \} $$, where $$ f_\theta(.) $$ encodes $$x_i$$ into an embedding space, where similar observations are pushed closer together and dissimilar ones are pushed further apart. What "similar" means will depend on the use case; in a  supervised setting, it will correspond to the labels $$y_i \in \{1, \dots, L\}$$ for $$ \{ \mathbf{x}_i \} $$, while in a self-supervised setting, a mining strategy needs to be developed. This could be e.g. a rotated version of the same image should still yield about the same embedding.
 
 #### **_Paired Contrastive Loss_** 
-Introduced in [Chopra et al 2005](http://yann.lecun.com/exdb/publis/pdf/chopra-05.pdf), which is one of the earliest uses of the contrastive loss. Here, the contrastive loss takes in pairs of input data points $$ (x_i, x_j) $$ and minimizes the distance between positive pairs in embedding space while maximizing the distance of negative pairs.
+Introduced in [Chopra et al 2005](http://yann.lecun.com/exdb/publis/pdf/chopra-05.pdf), which is one of the earliest uses of the contrastive loss. Here, the contrastive loss takes in pairs of input data points $$ (x_i, x_j) $$ and minimizes the distance between positive pairs in embedding space while maximizing the distance of the negative pairs.
 
 $$ \begin{equation} \mathcal{L}(\mathbf{x}_i, \mathbf{x}_j, \theta) = \mathbb{1}[y_i=y_j] \| f_\theta(\mathbf{x}_i) - f_\theta(\mathbf{x}_j) \|^2_2 + \mathbb{1}[y_i\neq y_j]\max(0, \epsilon - \|f_\theta(\mathbf{x}_i) - f_\theta(\mathbf{x}_j)\|_2)^2 \end{equation} $$
 
 Where $$ \epsilon $$ is a hyperparameter that controls the maximum distance between negative pairs, which essentially becomes as target distance for negative pairs.
 
 #### **_Triplet Loss_** 
+
+**Update the loss with extra inequlaity for better understanding**
 Triplet loss uses three data points as input: $$ (\mathbf{x}, \mathbf{x}^+, \mathbf{x}^-) $$, where $$ \mathbf{x} $$ is called the anchor point, and $$ \mathbf{x}^+ $$ and $$ \mathbf{x}^- $$ are a positive and negative pair with $$ \mathbf{x} $$, respectively. It was introduced in FaceNet by [Schroff et al. 2015](https://arxiv.org/abs/1503.03832), where it was used to train a face recognition model of the same person in different poses and angles. The motivation for the triplet loss is to avoid that the classes will be projected onto a single point (as paired contrastive loss encourages), and rather enforce a margin between positive pairs within a class and to the other classes.
 
 ![](../images/contrastive_learning/triplet-loss.png){:width="70%"}
-*Fig. 1: Triplet loss showing positives being pushed closer to the anchor and negative further away. (Image source: [Schroff et al. 2015](https://arxiv.org/abs/1503.03832))*
+*Fig. 1: Triplet loss showing positives being pushed closer to the anchor and negatives further away. (Image source: [Schroff et al. 2015](https://arxiv.org/abs/1503.03832))*
 
 
 The triplet loss is given by the following equation:

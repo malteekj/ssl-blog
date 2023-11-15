@@ -14,9 +14,12 @@ This log is intended to offer an overview of self-supervised deep learning. Many
 # Topics
 
 
-## [Variational Autoencoders](/ssl-blog/VAEs)
+## **Generative models**
+- ### [Variational Autoencoders](/ssl-blog/VAEs)
 
-## [Contrastive Learning](/ssl-blog/contrastive-learning)
+## **Constrastive Learning**
+- ### [Contrastive Loss](/ssl-blog/contrastive-loss)
+- ### [Contrastive Learning Models](/ssl-blog/contrastive-learning-models)
 
 ## [Innate Relationship](/ssl-blog/innate-relationship)
 
