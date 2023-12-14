@@ -54,18 +54,30 @@ permalink: /contrastive-learning-models/
 ### **SimCLR**<a name="#seminal-papers"></a>
 SimCLR, "A Simple Framework for Contrastive Learning of Visual Representations" Chen et. al. was presented at ICML 2020.
 
+![](../images/contrastive_learning_models/SimCLR_framework.png){:width="50%"}
+*Fig. ?: Schematic of the SimCLR model (Image source: [Chen et al. 2020](https://arxiv.org/abs/2002.05709))*
+
+![](../images/contrastive_learning_models/SimCLR_global_local_crop.png){:width="50%"}
+*Fig. ?: Local and global cropping strategy for the contrastive prediction task. (Image source: [Chen et al. 2020](https://arxiv.org/abs/2002.05709))*
+
 methods:
 
 Consists of the following parts 
- - Stochastic data augmentation: sequentially apply random crop (+ resize back to original size), random color distortion and gaussian blur (crop + color distortion combination is very important)
-  - Base encoder f(.) (resnet) which encodes the augmented images into $$ h \in \mathcal{R}^n $$
-  - A non-linear projection  head g(h) = z that is a two layer MLP from. The authors found it helpful to apply the contrastive loss on z, and then discard g(.) after training and fine tune on h. z is mostly a 128 dimensional space.
-  - the apply contrastive learning loss function (NT-Xent (the normalized temperature-scaled cross entropy loss).) Each example in the batch is augmented into two images. Each augmented pair is treated as a positive pair, and the rest of the pairs in the batch are teated as negative pairs.
-  <!-- More math from the paper could be used to describe this section -->
+- Stochastic data augmentation: sequentially apply random crop (+ resize back to original size), random color distortion and gaussian blur (crop + color distortion combination is very important)
+    - They theorize that the color histogram is sufficient to distinguish the augmentations, hence the color distortions is necessary for the net to not exploit this and learn bad representations.
+    - Stronger color distortions gives better SSL performance but not supervised (i.e. SSL needs stronger augmentation than supervised)
+- SSL models benefits more from bigger encoders than supervised (see fig. 7 in the paper)  
+- Base encoder f(.) (resnet) which encodes the augmented images into $$ h \in \mathcal{R}^n $$
+- A non-linear projection  head g(h) = z that is a two layer MLP from. The authors found it helpful to apply the contrastive loss on z, and then discard g(.) after training and fine tune on h. z is mostly a 128 dimensional space.
+    - They show that a non-linear projection head for g(h) = z helps the representations of f(x) = h to make better representations, and hypothesize that g(h) has to be invariant to transformations, and hence g(h) can remove information that may be useful for downstream tasks (but not for the contrastive task) 
+- the apply contrastive learning loss function (NT-Xent (the normalized temperature-scaled cross entropy loss).) Each example in the batch is augmented into two images. Each augmented pair is treated as a positive pair, and the rest of the pairs in the batch are teated as negative pairs.
+- That authors emphasize the importance of the global/local crops + resize to omit the use of different architectures 
+<!-- More math from the paper could be used to describe this section -->
 
 Training:
  - SGD/Momentum was unstable for large batch sizes, so they used the LARS optimizer for all batch sizes and 32-128 TPU cores
  - Global BN was aggregated over all devices (mean and variance) to avoid local exploitation for increased accuracy for the positive pairs, but without getting better representations
+ 
 
 
 Results:
