@@ -77,7 +77,19 @@ Consists of the following parts
 Training:
  - SGD/Momentum was unstable for large batch sizes, so they used the LARS optimizer for all batch sizes and 32-128 TPU cores
  - Global BN was aggregated over all devices (mean and variance) to avoid local exploitation for increased accuracy for the positive pairs, but without getting better representations
- 
+ - The NT-Xent uses cosine similarity together in cross-entropy, which explicitly weights each sample by difficulty (mining hard negatives)
+    - They also tried logistic link and triplet loss (with margin for semihard samples), which performed worse than NT-Xent
+$$\begin{align}
+\ell_{i, j}=-\log \frac{\exp \left(\operatorname{sim}\left(\boldsymbol{z}_i, \boldsymbol{z}_j\right) / \tau\right)}{\sum_{k=1}^{2 N} \mathbb{1}_{[k \neq i]} \exp \left(\operatorname{sim}\left(\boldsymbol{z}_i, \boldsymbol{z}_k\right) / \tau\right)}
+\end{align}$$
+When taking the gradient, it can be seen that each sample is weighted in the loss, which ensures the hard negative mining.
+
+$$\begin{align}
+\left(1-\frac{\exp \left(\boldsymbol{u}^T \boldsymbol{v}^{+} / \tau\right)}{Z(\boldsymbol{u})}\right) / \tau \boldsymbol{v}^{+}-\sum_{\boldsymbol{v}^{-}} \frac{\exp \left(\boldsymbol{u}^T \boldsymbol{v}^{-} / \tau\right)}{Z(\boldsymbol{u})} / \tau \boldsymbol{v}^{-}
+\end{align}$$
+
+- The authors find that $$ \ell_2 $$ normalization and a properly tuned temperature is essential for good representation learning. Higher accuracy in the contrastive task does not necessary translate into better performance on ImageNet. No $$ \ell_2 $$ normalization leads to high contrastive accuracy but worse generalization on ImageNet 
+
 
 
 Results:
