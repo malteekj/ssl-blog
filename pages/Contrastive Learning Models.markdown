@@ -51,7 +51,8 @@ permalink: /contrastive-learning-models/
     - Supervision from NLI (alot of BERT)
     - Unsupervised Sentence Embedding Learning (context prediction, mutual information)
 
-### **SimCLR**<a name="#seminal-papers"></a>
+### **Seminal Papers**<a name="#seminal-papers"></a>
+#### **SimCLR**
 SimCLR, "A Simple Framework for Contrastive Learning of Visual Representations" Chen et. al. was presented at ICML 2020.
 
 ![](../images/contrastive_learning_models/SimCLR_framework.png){:width="50%"}
@@ -117,6 +118,8 @@ priately adjusted temperature parameter.
 longer training compared to its supervised counterpart.
 Like supervised learning, contrastive learning benefits
 from deeper and wider networks.
+
+
 
 &nbsp;
 

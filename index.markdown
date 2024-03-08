@@ -20,6 +20,7 @@ This log is intended to offer an overview of self-supervised deep learning. Many
 ## **Constrastive Learning**
 - ### [Contrastive Loss](/ssl-blog/contrastive-loss)
 - ### [Contrastive Learning Models](/ssl-blog/contrastive-learning-models)
+  - #### [DINO](/ssl-blog/contrastive-learning-models/DINO)
 
 ## [Innate Relationship](/ssl-blog/innate-relationship)
 
